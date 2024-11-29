@@ -12,15 +12,14 @@
 #飽きてきたので一旦保留・・・
 
 #[残作業]
-#クモの動き
 #(済)一番下の段にキノコは置かない
-#すてーじ１０あたりから、つながるムカデは５匹、それ以外は１匹ずつに出現する
+#ステージ１０あたりから、つながるムカデは５匹、それ以外は１匹ずつに出現する
 #そのごつながるムカデの数は１匹ずつへっていき最後はみな１匹ずつの出現に変わる
 #最後の１匹になってしばらくすると両側から１匹ずつ現れる
 #ステージ変わったら色変え（cidにオフセット加算）
 #効果音入れ
 
-#2024.11.29 クモの動きを仮入れ
+#2024.11.29 クモの動き
 #2024.11.26 スコア作成
 #2024.11.25 ステージクリア、ゲームオーバー表記
 #2024.11.25 残機表記
@@ -118,6 +117,7 @@ cwait				=	0x09		#汎用カウンタ
 cmukade				=	0x0a		#接合元id（ムカデ用）
 cjoin				=	0x0b		#接合先id（ムカデ用）
 csavecnt			=	0x0c		#位置情報記憶カウンタ（ムカデ用）
+cmpat				=	0x0c		#移動パターン番号（クモ用）
 cmcnt				=	0x0d		#移動カウンタ
 cmnum				=	0x0e
 cstep				=	0x0f
@@ -1051,35 +1051,114 @@ def mukade_body_move( _wk ):
 
 #-----------------------------------------------------------------
 #クモ制御
-#	右から出てきて、左下、左上、下、上、下２、上２、左下、左上、左下、左上、フレームアウト
-#	左から出てきて、右下、右上、下、上、下２、上２、右下、右上、右下、右上、フレームアウト
-#	右から出てきて、左下、左上、プレイヤーめがけて？、左下、左上、左下、左上、フレームアウト
-#	左から同様
-#	移動距離や上昇下降範囲はランダム？
-#-----------------------------------------------------------------
 #	上下移動をベースとして上下移動の組み合わせが時々混じるような動き
-#	ランダムっぽいけどなんとも作りにくい
-#	なんかうまくいかなくて・・・飽きてきた(^^;
+#	ランダムっぽいけど、、、動きはまだ納得いかない
 #-----------------------------------------------------------------
 def kumo_control():
 
 	#移動パターンをいくつか作ってどれかを選ぶ・・・
-	#下記は羅列方式・・・ランダムでもいいのだけれど・・・もともとの動きが決まってないような？？？
+	movtbl = [0 for tbl in range(8)]
 				#カウンタ、xspd,yspd
-	movtbl = [ 20, -2,  2,
-				   18,  0, -2,
-				   12,  0,  2,
-				   18,  0, -2,
-				   24,  0,  2,
-				  20, -2, -2,
-				  20, -2,  2,
-				  20, -2, -2,
-				  20, -2,  2,
-				  20, -2, -2,
-				  20, -2,  2,
-				  20, -2, -2,
-				  20, -2,  2,
-				  0xff]
+	movtbl[0] = [	20, -2,  2,
+					18,  0, -2,
+					12,  0,  2,
+					18,  0, -2,
+					24,  0,  2,
+					20, -2, -2,
+					20, -2,  2,
+					20, -2, -2,
+					20, -2,  2,
+					20, -2, -2,
+					20, -2,  2,
+					0xff]
+	movtbl[1] = [	20, -2,  2,
+					18,  0, -2,
+					12,  0,  2,
+					18,  0, -2,
+					24,  0,  2,
+					20, -2, -2,
+					20, -2,  2,
+					20, -2, -2,
+					20, -2,  2,
+					18,  0, -2,
+					12,  0,  2,
+					18,  0, -2,
+					24,  0,  2,
+					20, -2, -2,
+					20, -2,  2,
+					0xff]
+	movtbl[2] = [	20, -2,  2,
+					20, -2, -2,
+					20, -2,  2,
+					20, -2, -2,
+					20, -2,  2,
+					18,  0, -2,
+					12,  0,  2,
+					18,  0, -2,
+					24,  0,  2,
+					20, -2, -2,
+					20, -2,  2,
+					0xff]
+	movtbl[3] = [	20, -2,  2,
+					18,  0, -2,
+					18,  0,  2,
+					20, -2, -2,
+					20, -2,  2,
+					20, -2, -2,
+					20, -2,  2,
+					18,  0, -2,
+					18,  0,  2,
+					20, -2, -2,
+					20, -2,  2,
+					0xff]
+	movtbl[4] = [	20, -2,  2,
+					20, -2, -2,
+					20, -2,  2,
+					18,  0, -2,
+					12,  0,  2,
+					18,  0, -2,
+					24,  0,  2,
+					20, -2, -2,
+					20, -2,  2,
+					20, -2, -2,
+					20, -2,  2,
+					0xff]
+	movtbl[5] = [	20, -2,  2,
+					18,  0, -2,
+					18,  0,  2,
+					20, -2, -2,
+					20, -2,  2,
+					18,  0, -2,
+					12,  0,  2,
+					18,  0, -2,
+					24,  0,  2,
+					20, -2, -2,
+					20, -2,  2,
+					18,  0, -2,
+					18,  0,  2,
+					20, -2, -2,
+					20, -2,  2,
+					0xff]
+	movtbl[6] = [	13, -3,  3,
+					13, -3, -3,
+					13, -3,  3,
+					13, -3, -3,
+					13, -3,  3,
+					13, -3, -3,
+					13, -3,  3,
+					0xff]
+	movtbl[7] = [	13, -3,  3,
+					13, -3, -3,
+					13, -3,  3,
+					18,  0, -2,
+					12,  0,  2,
+					18,  0, -2,
+					24,  0,  2,
+					13, -3, -3,
+					13, -3,  3,
+					13, -3, -3,
+					13, -3,  3,
+					0xff]
 
 	for _cnt in range( KUMO_MAX ):
 		_wk = KUMO_WORK + ( _cnt * CWORK_SIZE )
@@ -1088,29 +1167,34 @@ def kumo_control():
 			GWK[_wk + cwait] -= 1
 			if( GWK[_wk + cwait] < 0 ):
 				#出現位置をセット
-				#if( pyxel.frame_count & 1 ):
-				
-				#右から左へ移動
-				GWK[_wk + cxpos] = SCREEN_WIDTH
-				
-				#else:
-				#	#左から右へ移動
-				#	GWK[_wk + cxpos] = -0x12
-				#	GWK[_wk + ccond] |= F_HMOVE
-				
+				if( pyxel.frame_count & 1 ):
+					#右から左へ移動
+					GWK[_wk + cxpos] = SCREEN_WIDTH
+				else:
+					#左から右へ移動
+					GWK[_wk + cxpos] = -0x12
+					GWK[_wk + ccond] |= F_HMOVE
+
 				GWK[_wk + ccond] |= F_LIVE
 				GWK[_wk + cypos] = SCREEN_HEIGHT - ( DOWN_AREA * CSIZE )
 				GWK[_wk + cstep] = 1
 
 		elif( GWK[_wk + cstep] == 1 ):
+			_tbl = movtbl[GWK[_wk + cmpat]]
 			if( GWK[_wk + ccond] & F_LIVE ):
-				if( movtbl[ GWK[_wk + cmnum] * 3 + 0 ] == 0xff ):
+				if( _tbl[ GWK[_wk + cmnum] * 3 + 0 ] == 0xff ):
 					GWK[_wk + ccond] = 0
 				else:
-					GWK[_wk + cxspd] = movtbl[ GWK[_wk + cmnum] * 3 + 1 ]
-					GWK[_wk + cyspd] = movtbl[ GWK[_wk + cmnum] * 3 + 2 ]
+					if( GWK[_wk + ccond] & F_HMOVE ):
+						#右移動
+						GWK[_wk + cxspd] = _tbl[ GWK[_wk + cmnum] * 3 + 1 ] * (-1)
+					else:
+						#左移動
+						GWK[_wk + cxspd] = _tbl[ GWK[_wk + cmnum] * 3 + 1 ]
+
+					GWK[_wk + cyspd] = _tbl[ GWK[_wk + cmnum] * 3 + 2 ]
 					GWK[_wk + cmcnt] += 1
-					if( movtbl[ GWK[_wk + cmnum] * 3 + 0 ] < GWK[_wk + cmcnt] ):
+					if( _tbl[ GWK[_wk + cmnum] * 3 + 0 ] < GWK[_wk + cmcnt] ):
 						GWK[_wk + cmnum] += 1
 						GWK[_wk + cmcnt] = 0
 					else:
@@ -1119,8 +1203,26 @@ def kumo_control():
 						
 						if( GWK[_wk + cxpos] < -0x12 ):
 							GWK[_wk + ccond] = 0
-							GWK[_wk + cwait] = pyxel.rndi( 200*_cnt, (200*_cnt)+500 )
+							GWK[_wk + cwait] = kumo_wait_set()
 
+#-----------------------------------------------------------------
+#クモ登場待ち時間セット
+#-----------------------------------------------------------------
+def kumo_wait_set():
+	_min = 200
+	_max = 500
+	if( GWK[stage_number] < 10 ):
+		_min = _min - ( GWK[stage_number] * 10 )
+		_max = _max - ( GWK[stage_number] * 20 )
+	else:
+		_min = 100
+		_max = 300
+	
+	return ( pyxel.rndi( _min, _max ) )
+
+#-----------------------------------------------------------------
+#
+#-----------------------------------------------------------------
 def kumo_init():
 
 	for _cnt in range( KUMO_MAX ):
@@ -1128,10 +1230,11 @@ def kumo_init():
 		GWK[_wk + cid] = 0x13
 		GWK[_wk + canum] = 0x0a
 		GWK[_wk + cstep] = 0
+		GWK[_wk + cmpat] = ( GWK[stage_number] & 7 )
 		GWK[_wk + cmcnt] = 0
 		GWK[_wk + cmnum] = 0
 		GWK[_wk + ccond] = 0
-		GWK[_wk + cwait] = pyxel.rndi( 200*_cnt, (200*_cnt)+500 )
+		GWK[_wk + cwait] = kumo_wait_set()
 
 		GWK[_wk + cxpos] = 0
 		GWK[_wk + cypos] = 0
@@ -1252,7 +1355,7 @@ def player_control():
 		#				#HIT!
 		#				GWK[_wk + ccond] = 0
 		#				GWK[PLY_WORK + ccond] |= F_HIT
-		#				#★[TODO]サソリヒットスコアセット
+		#				#サソリヒットスコアセット
 		#				return
 
 		#プレイヤーとクモ
@@ -1278,8 +1381,10 @@ def player_control():
 		for _cnt in range( MUKADE_MAX ):
 			_wk = MUKADE_WORK + ( _cnt * CWORK_SIZE )
 			if( GWK[_wk + ccond] & F_LIVE ):
-				if( ( ( GWK[_wk + cxpos] - (CSIZE/2) ) <= _xp < ( GWK[_wk + cxpos]+7  + (CSIZE/2) ) ) and 
-					( ( GWK[_wk + cypos] - (CSIZE/2) ) <= _yp < ( GWK[_wk + cypos]+7  + (CSIZE/2) ) ) ):
+#				if( ( ( GWK[_wk + cxpos] - (CSIZE/2) ) <= _xp < ( GWK[_wk + cxpos]+7  + (CSIZE/2) ) ) and 
+#					( ( GWK[_wk + cypos] - (CSIZE/2) ) <= _yp < ( GWK[_wk + cypos]+7  + (CSIZE/2) ) ) ):
+				if( ( ( GWK[_wk + cxpos] - (CSIZE/2) ) <= _xp < ( GWK[_wk + cxpos]+6  + (CSIZE/2) ) ) and 
+					( ( GWK[_wk + cypos] - (CSIZE/2) ) <= _yp < ( GWK[_wk + cypos]+6  + (CSIZE/2) ) ) ):
 						#HIT!
 						GWK[_wk + ccond] |= F_HIT		#ムカデヒット後の処理はムカデ側で実施
 						GWK[PLY_WORK + ccond] |= F_HIT
@@ -1306,7 +1411,7 @@ def player_control():
 					GWK[PTAMA_WORK + cxpos] = GWK[PLY_WORK + cxpos] + 4
 					GWK[PTAMA_WORK + cypos] = GWK[PLY_WORK + cypos]
 					GWK[PTAMA_WORK + cxspd] = 0
-					GWK[PTAMA_WORK + cyspd] = 8
+					GWK[PTAMA_WORK + cyspd] = 12
 
 #-----------------------------------------------------------------
 #プレイヤー弾制御
