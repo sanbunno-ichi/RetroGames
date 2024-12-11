@@ -1210,8 +1210,19 @@ def update():
 			_rest_time = GWK[rest_time] - GWK[past_time]
 			if( _rest_time <= 0 ):
 				#タイムオーバー
-				GWK[game_subadv] = GS_OVER
-				GWK[wait_counter] = 0
+
+				#移動数オーバーでスキップ数減算
+				GWK[skip_number] -= 1
+				if( GWK[skip_number] <= 0 ):
+					#スキップ数オーバー
+					GWK[game_subadv] = GS_OVER
+					GWK[wait_counter] = 0
+				else:
+					GWK[game_subadv] = GS_SKIP
+					GWK[wait_counter] = 0
+
+				#GWK[game_subadv] = GS_OVER
+				#GWK[wait_counter] = 0
 
 			#SKIP BTNチェック
 			GWK[skip_btn_sw] = 0
