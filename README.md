@@ -2,7 +2,7 @@
 
 clone game を細々と作っていくところ  
 
-gemx v1.0公開  
+2024.12.21 Gem'X v1.0 公開  
 ![SS](gemx20241210.png)
 
 centipede 作成中  
