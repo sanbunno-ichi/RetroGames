@@ -2,8 +2,7 @@
 
 clone game を細々と作っていくところ  
 
-gemx 作成中  
-パズル面集めが大変！  
+gemx v1.0公開  
 ![SS](gemx20241210.png)
 
 centipede 作成中  
